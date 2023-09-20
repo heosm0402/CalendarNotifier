@@ -45,14 +45,12 @@ public class NotionController {
     }
 
     @GetMapping("/users")
-    public ArrayList<NotionMemberObject> getAllUsers() {
+    public DefaultResponse getAllUsers() {
         ArrayList<NotionMemberObject> result = notionService.listAllUserInfo();
-        for (NotionMemberObject m : result) {
-            System.out.println(m.getName() + ": " + m.getId() + ": " + m.getAvatar_url());
-        }
         DefaultResponse defaultResponse = new DefaultResponse();
         defaultResponse.setStatus(HttpStatus.OK);
         defaultResponse.setMsg("list all users");
-        return result;
+        defaultResponse.setPayload(result);
+        return defaultResponse;
     }
 }
