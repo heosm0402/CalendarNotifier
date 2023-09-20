@@ -1,8 +1,8 @@
 package com.sommin.calendarNotifier.controller;
 
 import com.sommin.calendarNotifier.domain.DefaultResponse;
+import com.sommin.calendarNotifier.domain.NotionMemberObject;
 import com.sommin.calendarNotifier.service.NotionService;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,12 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/notion")
@@ -47,4 +44,15 @@ public class NotionController {
         return defaultResponse;
     }
 
+    @GetMapping("/users")
+    public ArrayList<NotionMemberObject> getAllUsers() {
+        ArrayList<NotionMemberObject> result = notionService.listAllUserInfo();
+        for (NotionMemberObject m : result) {
+            System.out.println(m.getName() + ": " + m.getId() + ": " + m.getAvatar_url());
+        }
+        DefaultResponse defaultResponse = new DefaultResponse();
+        defaultResponse.setStatus(HttpStatus.OK);
+        defaultResponse.setMsg("list all users");
+        return result;
+    }
 }
