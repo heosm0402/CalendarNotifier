@@ -22,7 +22,7 @@ public class NotionClient {
         this.notionRepository = notionRepository;
     }
 
-    public void extractDatabase(String databaseName) {
+    public String extractDatabase(String databaseName) {
         HttpHeaders headers = getHeader();
         String databaseId = notionRepository.getNotionDatabaseIdByName(databaseName);
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
@@ -33,7 +33,8 @@ public class NotionClient {
 
         ResponseEntity<String> response = rt.exchange(apiEndPoint, HttpMethod.POST, entity, String.class);
         String result = response.getBody();
-        System.out.println(result);
+
+        return result;
     }
 
     private HttpHeaders getHeader() {
