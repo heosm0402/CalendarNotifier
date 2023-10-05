@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class NotionService {
+    private final String CALENDAR_DB = "calendarDB";
     private final NotionClient notionClient;
     private final Gson gson = new Gson();
 
@@ -18,21 +19,32 @@ public class NotionService {
 
     public ArrayList<NotionPageObject> extractCalendarData(LocalDate localDate) {
         System.out.println("local date: " + localDate);
-        String result = notionClient.extractDatabase("회의/출장/휴가");
+        String result = notionClient.extractDatabase(CALENDAR_DB);
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(result).getAsJsonObject();
         JsonArray jsonArrayForEventNotionPage = jsonObject.get("results").getAsJsonArray();
         ArrayList<NotionPageObject> calendarPageDataArrayList = new ArrayList<>();
-        int i = 0;
         for (JsonElement eventNotionPage : jsonArrayForEventNotionPage ) {
-            JsonObject eventNotionPageJson = eventNotionPage.getAsJsonObject();
+            NotionPageObject notionPageObject = extractNotionPageObjectFromJsonElement(eventNotionPage);
+            calendarPageDataArrayList.add(notionPageObject);
+        }
+        return calendarPageDataArrayList;
+    }
 
-            NotionPageObject notionPageObject = new NotionPageObject();
-            notionPageObject.setUrl(eventNotionPageJson.get("url").getAsString());
-            notionPageObject.setObjectId(eventNotionPageJson.get("id").getAsString());
+    private NotionPageObject extractNotionPageObjectFromJsonElement(JsonElement notionPage) {
+        NotionPageObject notionPageObject = new NotionPageObject();
 
-            JsonObject notionPageProperties = eventNotionPageJson.get("properties").getAsJsonObject();
-            notionPageObject.setPageTitle(notionPageProperties.get("이름").getAsJsonObject().get("title").getAsJsonArray().get(0).getAsJsonObject().get("plain_text").getAsString());
+        // set page url, id
+        JsonObject eventNotionPageJson = notionPage.getAsJsonObject();
+        notionPageObject.setUrl(eventNotionPageJson.get("url").getAsString());
+        notionPageObject.setObjectId(eventNotionPageJson.get("id").getAsString());
+
+        // get page properties
+        JsonObject notionPageProperties = eventNotionPageJson.get("properties").getAsJsonObject();
+
+        // set page people
+        boolean isPeopleNull = notionPageProperties.get("대상자").getAsJsonObject().get("people").isJsonNull();
+        if (!isPeopleNull){
             JsonArray peopleJsonArray = notionPageProperties.get("대상자").getAsJsonObject().get("people").getAsJsonArray();
             ArrayList<NotionMemberObject> peopleArrayList = new ArrayList<>();
             for (JsonElement peopleObject : peopleJsonArray) {
@@ -40,15 +52,27 @@ public class NotionService {
                 peopleArrayList.add(gson.fromJson(peopleJson.toString(), NotionMemberObject.class));
             }
             notionPageObject.setPeople(peopleArrayList);
-//            notionPageObject.setPeople(notionPageProperties.get("대상자").getAsJsonObject().get("people").getAsJsonArray());
-            notionPageObject.setStartDate(notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("start").getAsString());
-            Boolean end = notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("end").isJsonNull();
-            if (!end) {
-                notionPageObject.setEndDate(notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("end").getAsString());
-            }
-            calendarPageDataArrayList.add(notionPageObject);
         }
-        return calendarPageDataArrayList;
+
+        // set page title
+        boolean isTitleNull = notionPageProperties.get("이름").getAsJsonObject().get("title").getAsJsonArray().get(0).getAsJsonObject().get("plain_text").isJsonNull();
+        if (!isTitleNull) {
+            notionPageObject.setPageTitle(notionPageProperties.get("이름").getAsJsonObject().get("title").getAsJsonArray().get(0).getAsJsonObject().get("plain_text").getAsString());
+        }
+
+        // set page start date
+        boolean isStartdateNull = notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("start").isJsonNull();
+        if (!isStartdateNull) {
+            notionPageObject.setStartDate(notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("start").getAsString());
+        }
+
+        // set page end date
+        boolean isEnddateNull = notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("end").isJsonNull();
+        if (!isEnddateNull) {
+            notionPageObject.setEndDate(notionPageProperties.get("날짜").getAsJsonObject().get("date").getAsJsonObject().get("end").getAsString());
+        }
+
+        return notionPageObject;
     }
 
     public ArrayList<NotionMemberObject> listAllUserInfo() {
