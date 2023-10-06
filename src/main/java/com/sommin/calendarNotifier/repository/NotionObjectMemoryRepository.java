@@ -12,6 +12,7 @@ public class NotionObjectMemoryRepository implements NotionRepository {
         this.databaseMapper = new HashMap<>();
         databaseMapper.put("db1", System.getenv("db1"));
         databaseMapper.put("db2", System.getenv("db2"));
+        databaseMapper.put("calendarDB", System.getenv("calendarDB"));
 
         this.userMapper = new HashMap<>();
         userMapper.put("user1", System.getenv("user1"));
