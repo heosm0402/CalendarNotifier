@@ -22,19 +22,26 @@ public class NotionClient {
         this.notionRepository = notionRepository;
     }
 
-    public String extractDatabase(String databaseName) {
-        HttpHeaders headers = getHeader();
+    public String extractDatabase(String databaseName, String isoDate) {
         String databaseId = notionRepository.getNotionDatabaseIdByName(databaseName);
-        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(parameters, headers);
+        JSONObject dateMap = new JSONObject();
+        dateMap.put("after", isoDate);
+
+        JSONObject filterMap = new JSONObject();
+        filterMap.put("property", "날짜");
+        filterMap.put("date", dateMap);
+
+        JSONObject body = new JSONObject();
+        body.put("filter", filterMap);
+
+        HttpHeaders headers = getHeader();
+        HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
         RestTemplate rt = new RestTemplate();
         String apiEndPoint = NOTION_BASE_URL + "databases/" + databaseId + "/" + "query";
 
         ResponseEntity<String> response = rt.exchange(apiEndPoint, HttpMethod.POST, entity, String.class);
-        String result = response.getBody();
-
-        return result;
+        return response.getBody();
     }
 
     private HttpHeaders getHeader() {

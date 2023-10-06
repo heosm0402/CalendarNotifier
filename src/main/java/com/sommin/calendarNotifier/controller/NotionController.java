@@ -1,6 +1,5 @@
 package com.sommin.calendarNotifier.controller;
 
-import com.google.gson.JsonObject;
 import com.sommin.calendarNotifier.domain.NotionMemberObject;
 import com.sommin.calendarNotifier.domain.NotionPageObject;
 import com.sommin.calendarNotifier.http.ApiResponse;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 @Controller
@@ -45,9 +42,8 @@ public class NotionController {
 
     @GetMapping("/extract/{datetime}")
     public ResponseEntity<ApiResponse> extractNotionCalendarData(@PathVariable("datetime") String datetime) {
-        LocalDate localDate = LocalDate.parse(datetime, DateTimeFormatter.ISO_DATE);
-//        JsonObject calendarData = notionService.extractCalendarData(localDate, "회의/출장/휴가");
-        ArrayList<NotionPageObject> calendarPageDataArrayList = notionService.extractCalendarData(localDate);
+//        LocalDate localDate = LocalDate.parse(datetime, DateTimeFormatter.ISO_DATE);
+        ArrayList<NotionPageObject> calendarPageDataArrayList = notionService.extractCalendarData(datetime);
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setStatus(HttpStatus.OK);

@@ -5,7 +5,6 @@ import com.sommin.calendarNotifier.domain.NotionMemberObject;
 import com.sommin.calendarNotifier.domain.NotionPageObject;
 import org.json.JSONArray;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class NotionService {
@@ -17,9 +16,9 @@ public class NotionService {
         this.notionClient = notionClient;
     }
 
-    public ArrayList<NotionPageObject> extractCalendarData(LocalDate localDate) {
+    public ArrayList<NotionPageObject> extractCalendarData(String localDate) {
         System.out.println("local date: " + localDate);
-        String result = notionClient.extractDatabase(CALENDAR_DB);
+        String result = notionClient.extractDatabase(CALENDAR_DB, localDate);
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(result).getAsJsonObject();
         JsonArray jsonArrayForEventNotionPage = jsonObject.get("results").getAsJsonArray();
